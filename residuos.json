@@ -1,0 +1,104 @@
+{
+ "lat": "lat",
+ "lon": "lon",
+ "label": "distrito",
+ "axes": [
+  {
+   "col": "gpc_dom_2019",
+   "label": "GPC doméstico 2019",
+   "group": "Generación",
+   "invert": false
+  },
+  {
+   "col": "gpc_mun_2019",
+   "label": "GPC municipal 2019",
+   "group": "Generación",
+   "invert": false
+  },
+  {
+   "col": "gpc_dom_2022",
+   "label": "GPC doméstico 2022",
+   "group": "Generación",
+   "invert": false
+  },
+  {
+   "col": "gen_no_dom_t_dia_2022",
+   "label": "No doméstico t/día 2022",
+   "group": "Generación",
+   "invert": false
+  },
+  {
+   "col": "gen_dom_t_anio_2022",
+   "label": "Doméstico t/año 2022",
+   "group": "Generación",
+   "invert": false
+  },
+  {
+   "col": "pob_total",
+   "label": "Población total",
+   "group": "Población",
+   "invert": false
+  },
+  {
+   "col": "pob_urbana",
+   "label": "Población urbana",
+   "group": "Población",
+   "invert": false
+  },
+  {
+   "col": "pob_rural",
+   "label": "Población rural",
+   "group": "Población",
+   "invert": false
+  },
+  {
+   "col": "pob_densidad_2020",
+   "label": "Densidad 2020",
+   "group": "Población",
+   "invert": false
+  },
+  {
+   "col": "altitude",
+   "label": "Altitud",
+   "group": "Territorio",
+   "invert": false
+  },
+  {
+   "col": "idh_2019",
+   "label": "IDH 2019",
+   "group": "Territorio",
+   "invert": false
+  },
+  {
+   "col": "pct_pobreza_total",
+   "label": "Pobreza total %",
+   "group": "Pobreza",
+   "invert": true
+  },
+  {
+   "col": "pct_pobreza_extrema",
+   "label": "Pobreza extrema %",
+   "group": "Pobreza",
+   "invert": true
+  }
+ ],
+ "groups": [
+  {
+   "name": "Generación",
+   "color": "#7F77DD"
+  },
+  {
+   "name": "Población",
+   "color": "#EF9F27"
+  },
+  {
+   "name": "Territorio",
+   "color": "#1D9E75"
+  },
+  {
+   "name": "Pobreza",
+   "color": "#378ADD"
+  }
+ ],
+ "color": "idh_2019"
+}

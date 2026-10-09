@@ -1,0 +1,190 @@
+{
+ "lat": "lat",
+ "lon": "lon",
+ "label": "nome",
+ "axes": [
+  {
+   "col": "populacao",
+   "label": "População",
+   "group": "Economia",
+   "invert": false
+  },
+  {
+   "col": "pib_milhoes",
+   "label": "PIB",
+   "group": "Economia",
+   "invert": false
+  },
+  {
+   "col": "turistas",
+   "label": "Turistas",
+   "group": "Economia",
+   "invert": false
+  },
+  {
+   "col": "idhm",
+   "label": "IDHM",
+   "group": "Desenvolvimento social",
+   "invert": false
+  },
+  {
+   "col": "gini",
+   "label": "Gini",
+   "group": "Desenvolvimento social",
+   "invert": true
+  },
+  {
+   "col": "pct_favelas",
+   "label": "% favelas",
+   "group": "Desenvolvimento social",
+   "invert": true
+  },
+  {
+   "col": "risco_inundacao",
+   "label": "Risco de inundação",
+   "group": "Risco e clima",
+   "invert": true
+  },
+  {
+   "col": "prevalencia_vulnerab_natural",
+   "label": "Vulnerab. natural",
+   "group": "Risco e clima",
+   "invert": true
+  },
+  {
+   "col": "precipitacao",
+   "label": "Precipitação",
+   "group": "Risco e clima",
+   "invert": false
+  },
+  {
+   "col": "ictem",
+   "label": "ICTEM",
+   "group": "Risco e clima",
+   "invert": true
+  },
+  {
+   "col": "agua_idx",
+   "label": "Água",
+   "group": "Saneamento",
+   "invert": false
+  },
+  {
+   "col": "esgoto_idx",
+   "label": "Esgoto",
+   "group": "Saneamento",
+   "invert": false
+  },
+  {
+   "col": "esgoto_coletado_idx",
+   "label": "Esgoto coletado",
+   "group": "Saneamento",
+   "invert": false
+  },
+  {
+   "col": "esgoto_tratado_idx",
+   "label": "Esgoto tratado",
+   "group": "Saneamento",
+   "invert": false
+  },
+  {
+   "col": "perdas_agua",
+   "label": "Perdas de água",
+   "group": "Saneamento",
+   "invert": true
+  },
+  {
+   "col": "consumo_agua_pc",
+   "label": "Consumo per capita",
+   "group": "Saneamento",
+   "invert": false
+  },
+  {
+   "col": "coleta_seletiva_pct",
+   "label": "Coleta seletiva",
+   "group": "Saneamento",
+   "invert": false
+  },
+  {
+   "col": "diarreia_casos",
+   "label": "Diarreia",
+   "group": "Saúde",
+   "invert": true
+  },
+  {
+   "col": "leptospirose_casos",
+   "label": "Leptospirose",
+   "group": "Saúde",
+   "invert": true
+  },
+  {
+   "col": "hepatiteA_casos",
+   "label": "Hepatite A",
+   "group": "Saúde",
+   "invert": true
+  },
+  {
+   "col": "dengue_casos",
+   "label": "Dengue",
+   "group": "Saúde",
+   "invert": true
+  },
+  {
+   "col": "zika_casos",
+   "label": "Zika",
+   "group": "Saúde",
+   "invert": true
+  },
+  {
+   "col": "chikungunya_casos",
+   "label": "Chikungunya",
+   "group": "Saúde",
+   "invert": true
+  },
+  {
+   "col": "coef_total",
+   "label": "Coef. total",
+   "group": "Saúde",
+   "invert": true
+  },
+  {
+   "col": "enterococos_media",
+   "label": "Enterococos",
+   "group": "Praias",
+   "invert": true
+  },
+  {
+   "col": "pct_praias_boas",
+   "label": "% praias boas",
+   "group": "Praias",
+   "invert": false
+  }
+ ],
+ "groups": [
+  {
+   "name": "Economia",
+   "color": "#7F77DD"
+  },
+  {
+   "name": "Desenvolvimento social",
+   "color": "#EF9F27"
+  },
+  {
+   "name": "Risco e clima",
+   "color": "#1D9E75"
+  },
+  {
+   "name": "Saneamento",
+   "color": "#378ADD"
+  },
+  {
+   "name": "Saúde",
+   "color": "#D85A30"
+  },
+  {
+   "name": "Praias",
+   "color": "#D4537E"
+  }
+ ],
+ "color": "idhm"
+}

@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Radial explorer</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+:root{--bg:#f3f5f4;--pn:#fff;--ink:#16262b;--mut:#5d6d70;--ln:#d5dcdb;--ac:#0f6e56;--acb:#e1f5ee;--gl:rgba(255,255,255,.93)}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1719;--pn:#172125;--ink:#e6eeee;--mut:#9fb0b2;--ln:#2b3a3e;--ac:#5dcaa5;--acb:#0f3a31;--gl:rgba(23,33,37,.93)}}
+*{box-sizing:border-box}
+body{margin:0;height:100vh;display:grid;grid-template-columns:290px minmax(0,1fr);font:14px/1.45 'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+#pn{background:var(--pn);border-right:1px solid var(--ln);padding:14px;overflow:auto}
+h1{font-size:17px;font-weight:500;margin:0 0 10px}
+h2{font-size:13px;font-weight:500;color:var(--mut);margin:16px 0 6px}
+#wrap{position:relative;min-width:0}#map{position:absolute;inset:0;background:var(--bg)}
+#gl{position:absolute;z-index:600;pointer-events:none;display:none}
+#tt{position:absolute;z-index:610;top:12px;left:50%;transform:translateX(-50%);background:var(--gl);border:1px solid var(--ln);border-radius:8px;padding:6px 16px;text-align:center;pointer-events:none;display:none;font-size:12px;color:var(--mut)}#tt b{display:block;font-size:20px;font-weight:500;color:var(--ink)}
+#ax{position:absolute;z-index:610;bottom:28px;left:50%;transform:translateX(-50%);background:var(--gl);border:1px solid var(--ln);border-radius:8px;padding:6px 14px;text-align:center;pointer-events:none;display:none;font-size:12px;color:var(--mut)}#ax b{color:var(--ink);font-size:14px;font-weight:500}
+#xh{position:absolute;z-index:595;left:50%;top:50%;width:12px;height:12px;margin:-6px;border:1.5px solid var(--ac);border-radius:50%;pointer-events:none}
+input,textarea{font:inherit;color:var(--ink);background:var(--pn);border:1px solid var(--ln);border-radius:6px;padding:5px 8px;width:100%}input[type=range]{padding:0}
+#rb{position:absolute;z-index:590;border:1.5px dashed var(--ac);background:rgba(29,158,117,.1);display:none;pointer-events:none}
+button,select{font:inherit;color:var(--ink);background:var(--pn);border:1px solid var(--ln);border-radius:6px;padding:5px 10px;cursor:pointer}
+select{width:100%}
+button:hover{border-color:var(--ac)}
+button:focus-visible,select:focus-visible,.chip:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+.seg{display:flex}.seg button{flex:1;border-radius:0}.seg button:first-child{border-radius:6px 0 0 6px}.seg button:last-child{border-radius:0 6px 6px 0;border-left:0}
+.on{background:var(--acb)!important;color:var(--ac)!important;border-color:var(--ac)!important}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:2px 8px;margin:0 4px 4px 0;border:1px solid var(--ln);border-radius:6px;cursor:pointer;color:var(--mut)}
+.dt{width:8px;height:8px;border-radius:50%;background:var(--ln)}
+.drop{display:block;border:1px dashed var(--ln);border-radius:8px;padding:10px;text-align:center;color:var(--mut);cursor:pointer}
+.drop.hot{border-color:var(--ac);color:var(--ac)}
+.mut{color:var(--mut);font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:12px}td{padding:2px 0;border-bottom:1px solid var(--ln)}td:nth-child(n+2){text-align:right;white-space:nowrap;padding-left:6px}
+.row{display:flex;gap:6px;margin-top:6px}.row button{flex:1}
+@media(max-width:720px){body{grid-template-columns:1fr;grid-template-rows:auto 70vh;height:auto}#pn{border-right:0}}
+</style>
+</head>
+<body>
+<aside id="pn">
+<h1>Radial explorer</h1>
+<div class="mut">Examples</div><div id="pre" style="margin:4px 0 12px"><span class="chip" data-p="inteli">inteli.gente</span><span class="chip" data-p="litoral">Litoral SP</span><span class="chip" data-p="residuos">Residuos Perú</span></div>
+<div class="seg" role="group" aria-label="Interaction mode"><button id="m-hover" class="on">Hover</button><button id="m-brush">Brush</button></div>
+<div class="mut" id="hint" style="margin-top:6px"></div>
+<h2>Data</h2>
+<label class="drop" id="drop">Drop CSV or JSON, or choose files<input id="fi" type="file" accept=".csv,.json" multiple hidden></label>
+<div class="row"><button id="demo">Load synthetic demo</button></div>
+<div class="mut" id="info" style="margin-top:6px">No data loaded.</div>
+<h2>Bars on the radial</h2><div id="axc"></div>
+<h2>Angular order</h2>
+<select id="ord"><option value="g">By group</option><option value="v">By value, high to low</option></select>
+<h2>Radial size</h2><input id="sz" type="range" min=".5" max="1" step=".05" value=".85" aria-label="Radial size">
+<h2>Color points by</h2>
+<select id="col"></select><div id="leg" class="mut" style="margin-top:6px"></div>
+<div class="row"><button id="sg">Suggest setup</button><button id="sv">Save config</button></div>
+<div class="mut" id="ai" style="margin-top:6px"></div>
+<h2>AI setup (free, runs in your browser)</h2>
+<select id="mdl"><option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B, fast (roughly 0.9 GB)</option><option value="Llama-3.2-3B-Instruct-q4f16_1-MLC">Llama 3.2 3B, better (roughly 2.3 GB)</option></select>
+<textarea id="goal" rows="2" placeholder="What do you want to see? (optional)" style="margin-top:6px"></textarea>
+<div class="row"><button id="aiq">Ask AI</button></div>
+<progress id="pg" max="1" value="0" style="width:100%;display:none"></progress>
+<div class="mut" style="margin-top:4px">Needs a WebGPU browser such as Chrome or Edge. The model downloads once and stays cached. No key, and your data never leaves your device. Without WebGPU it uses the rule-based setup.</div>
+<h2>Details</h2><div id="det" class="mut"></div>
+</aside>
+<div id="wrap"><div id="map"></div><svg id="gl" viewBox="-70 -30 660 580" aria-hidden="true"></svg><div id="tt"></div><div id="ax"></div><div id="xh"></div><div id="rb"></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),PAL=['#7F77DD','#1D9E75','#D85A30','#378ADD','#D4537E','#BA7517','#639922','#888780'];
+let D=[],num=[],P={},meta={},cfg={axes:[],order:'g',color:'',mode:'hover'},pend=null,mk=[],sel=null,hi=-1,gcol={},st=null;
+const map=L.map('map',{zoomSnap:.25}).setView([-15,-55],4);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/'+(matchMedia('(prefers-color-scheme: dark)').matches?'dark_all':'light_all')+'/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(map);
+const cv=L.canvas({padding:.5}),lay=L.layerGroup().addTo(map);
+const isN=(r,c)=>typeof r[c]==='number'&&isFinite(r[c]);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=v=>typeof v==='number'?(Math.abs(v)>=100?Math.round(v).toLocaleString():+v.toFixed(2)):v==null?'':v;
+const av=(a,i)=>a.invert?1-P[a.col][i]:P[a.col][i];
+function mix(a,b,t){const p=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16)),A=p(a),B=p(b);return'rgb('+A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')+')'}
+function msg(t){$('#info').textContent=t}
+function gname(c){const k=c.split(/[_.:\s]/)[0];return num.filter(x=>x.split(/[_.:\s]/)[0]===k).length>1?k:'Other'}
+function load(rows){
+ rows=(rows||[]).filter(r=>r&&typeof r==='object');if(!rows.length)return msg('No rows found in that file.');
+ const cs=Object.keys(rows[0]),f=re=>cs.find(c=>re.test(c));
+ const la=pend&&pend.lat||f(/^(lat|latitude|latitud)$/i),lo=pend&&pend.lon||f(/^(lon|lng|long|longitude|longitud)$/i);
+ if(!la||!lo)return msg('Add lat and lon columns, or name them in a config file.');
+ D=rows.filter(r=>isN(r,la)&&isN(r,lo));if(!D.length)return msg('No rows with valid coordinates.');
+ meta={lat:la,lon:lo,label:pend&&pend.label||f(/name|nome|municip|distrit|label/i)||cs.find(c=>typeof D[0][c]==='string')||cs[0]};
+ num=cs.filter(c=>c!==la&&c!==lo&&!/(^id$|code|cod|ubigeo)/i.test(c)&&D.filter(r=>isN(r,c)).length>=.9*D.length&&new Set(D.map(r=>r[c])).size>3);
+ P={};num.forEach(c=>{const s=D.map(r=>isN(r,c)?r[c]:NaN).filter(isFinite).sort((a,b)=>a-b);P[c]=D.map(r=>{if(!isN(r,c))return .5;let l=0,h=s.length;while(l<h){const m=l+h>>1;s[m]<r[c]?l=m+1:h=m}return l/Math.max(1,s.length-1)})});
+ const pa=pend&&pend.axes?pend.axes.filter(a=>P[a.col]):null;
+ if(pa)pa.forEach(a=>{if(a.max!=null)P[a.col]=D.map(r=>isN(r,a.col)?Math.max(0,Math.min(1,(r[a.col]-(a.min||0))/(a.max-(a.min||0)))):0)});
+ cfg.axes=pa&&pa.length?pa:num.slice(0,30).map(c=>({col:c,label:c,group:gname(c),invert:false}));
+ cfg.color=pend&&pend.color||'';cfg.order=pend&&pend.order||'g';
+ gcol={};const gs=[...new Set(num.map(gname).concat(cfg.axes.map(a=>a.group)))];gs.forEach((g,i)=>gcol[g]=PAL[i%PAL.length]);
+ if(pend&&pend.groups)pend.groups.forEach(g=>gcol[g.name]=g.color);
+ pend=null;sel=null;lay.clearLayers();
+ const R=D.length<50?8:D.length<1500?5:3;
+ mk=D.map((d,i)=>L.circleMarker([d[la],d[lo]],{renderer:cv,radius:R,weight:.6,color:'#fff',fillOpacity:.85}).addTo(lay).on('mouseover',()=>cfg.mode==='hover'&&hover(i)).on('mouseout',()=>cfg.mode==='hover'&&focus()));
+ map.fitBounds(L.latLngBounds(D.map(d=>[d[la],d[lo]])),{padding:[40,40]});
+ msg(D.length.toLocaleString()+' points, '+num.length+' numeric columns.');ui();clear()}
+function ui(){
+ $('#axc').innerHTML=num.map(c=>{const a=cfg.axes.find(x=>x.col===c);return'<span class="chip'+(a?' on':'')+'" tabindex="0" role="button" data-c="'+esc(c)+'"><span class="dt" style="background:'+(a?gcol[a.group]:'')+'"></span>'+esc(a?a.label:c)+'</span>'}).join('');
+ const cs=Object.keys(D[0]).filter(c=>c!==meta.lat&&c!==meta.lon);
+ $('#col').innerHTML='<option value="">Single color</option>'+cs.map(c=>'<option value="'+esc(c)+'"'+(c===cfg.color?' selected':'')+'>'+esc(c)+'</option>').join('');
+ $('#ord').value=cfg.order;paint()}
+function catMap(c){const n={};D.forEach(r=>n[r[c]]=(n[r[c]]||0)+1);const k=Object.keys(n).sort((a,b)=>n[b]-n[a]).slice(0,8),m={};k.forEach((v,i)=>m[v]=PAL[i]);return m}
+function paint(ov){
+ const c=ov||cfg.color,num_=c&&P[c],cm=c&&!num_?catMap(c):null;
+ mk.forEach((m,i)=>{m.setStyle({fillColor:num_?mix('#AFA9EC','#3C3489',P[c][i]):cm?(cm[D[i][c]]||'#888780'):'#1D9E75',fillOpacity:sel?(sel.idx.includes(i)?.95:.2):.85})});
+ $('#leg').innerHTML=num_?'low to high percentile of '+esc(c):cm?Object.keys(cm).map(v=>'<span class="chip" style="cursor:default"><span class="dt" style="background:'+cm[v]+'"></span>'+esc(v)+'</span>').join(''):''}
+function sec(cx,cy,r1,r2,a1,a2){const p=(r,a)=>(cx+r*Math.cos(a)).toFixed(1)+' '+(cy+r*Math.sin(a)).toFixed(1),l=a2-a1>Math.PI?1:0;return'M'+p(r2,a1)+'A'+r2+' '+r2+' 0 '+l+' 1 '+p(r2,a2)+'L'+p(r1,a2)+'A'+r1+' '+r1+' 0 '+l+' 0 '+p(r1,a1)+'Z'}
+function glyph(items,title,sub){
+ const gs=[];items.forEach(it=>{let g=gs.find(x=>x.n===it.a.group);if(!g)gs.push(g={n:it.a.group,it:[]});g.it.push(it)});
+ if(cfg.order==='v')gs.forEach(g=>g.it.sort((a,b)=>b.v-a.v));
+ const G=gs.length,sw=Math.min(6.2832/G,5.2),pad=.05,W=sw-2*pad,r0=30,mc=Math.max(...gs.map(g=>g.it.length)),th=Math.min(34,170/mc),R=r0+mc*th,C=260,hf=R+62;let K=0;const flat=[];
+ const w=$('#wrap'),S=Math.min(w.clientWidth,w.clientHeight)*$('#sz').value,H=S,x=w.clientWidth/2,y=w.clientHeight/2;
+ const g=$('#gl');g.style.width=S+'px';g.style.height=H+'px';g.style.left=x-S/2+'px';g.style.top=y-H/2+'px';g.style.display='block';g.setAttribute('viewBox',(C-hf)+' '+(C-hf)+' '+2*hf+' '+2*hf);
+ const P_=(r,a)=>[C+r*Math.cos(a),C+r*Math.sin(a)];
+ let h='<circle cx="'+C+'" cy="'+C+'" r="'+(R+4)+'" style="fill:var(--gl);fill-opacity:.55;stroke:var(--ln)"/>';
+ gs.forEach((gr,gi)=>{
+  const A=-1.5708+gi*sw+pad,col=gcol[gr.n]||'#888780',mid=A+W/2,flip=Math.sin(mid)>0;
+  h+='<path d="'+sec(C,C,r0-6,R+2,A,A+W)+'" fill="'+col+'" fill-opacity=".07"/>';
+  gr.it.forEach((it,ri)=>{
+   const i1=r0+ri*th,i2=i1+th-3,rm=(i1+i2)/2,id='p'+gi+'_'+ri;
+   flat.push(it);h+='<path d="'+sec(C,C,i1,i2,A,A+W)+'" data-k="'+(K++)+'" pointer-events="all" style="fill:var(--ink);fill-opacity:.07;cursor:pointer"/>';
+   if(it.q!=null)h+='<path d="'+sec(C,C,i1,i2,A,A+W*it.q)+'" fill="'+col+'" fill-opacity=".35"/>';
+   h+='<path d="'+sec(C,C,i1,i2,A,A+W*Math.max(it.v,.012))+'" fill="'+col+'"/>';
+   const t1=P_(i1,A+W/2),t2=P_(i2,A+W/2);
+   h+='<path d="M'+t1[0].toFixed(1)+' '+t1[1].toFixed(1)+'L'+t2[0].toFixed(1)+' '+t2[1].toFixed(1)+'" stroke-dasharray="2 2" style="stroke:var(--ink);stroke-opacity:.55"/>';
+   const a=flip?A+W:A,b=flip?A:A+W,q1=P_(rm,a),q2=P_(rm,b);
+   h+='<path id="'+id+'" fill="none" d="M'+q1[0].toFixed(1)+' '+q1[1].toFixed(1)+'A'+rm.toFixed(1)+' '+rm.toFixed(1)+' 0 '+(W>Math.PI?1:0)+' '+(flip?0:1)+' '+q2[0].toFixed(1)+' '+q2[1].toFixed(1)+'"/>';
+   h+='<text font-size="'+Math.max(7,Math.min(11,th-6))+'" style="fill:var(--ink);stroke:var(--gl);stroke-width:3;paint-order:stroke"><textPath href="#'+id+'" startOffset="6">'+esc(it.a.label)+'  '+esc(it.t)+'</textPath></text>'});
+  const m=gr.it.reduce((s_,i)=>s_+i.v,0)/gr.it.length,bp=P_(R+14,mid),tp=P_(R+36,mid);
+  h+='<circle cx="'+bp[0].toFixed(1)+'" cy="'+bp[1].toFixed(1)+'" r="12" style="fill:var(--pn)" stroke="'+col+'" stroke-width="2"/><text x="'+bp[0].toFixed(1)+'" y="'+(bp[1]+4).toFixed(1)+'" text-anchor="middle" font-size="12" font-weight="500" style="fill:var(--ink)">'+Math.round(m*100)+'</text>';
+  h+='<text x="'+tp[0].toFixed(1)+'" y="'+(tp[1]+(Math.sin(mid)>0?10:0)).toFixed(1)+'" text-anchor="middle" font-size="13" font-weight="500" style="fill:var(--ink);stroke:var(--gl);stroke-width:3;paint-order:stroke">'+esc(gr.n)+'</text>'});
+ g.innerHTML=h;curItems=flat;const t=$('#tt');t.innerHTML='<b>'+esc(title)+'</b>'+esc(sub||'');t.style.display='block'}
+function hover(i){
+ if(hi>=0)mk[hi].setStyle({weight:.6,color:'#fff'});hi=i;mk[i].setStyle({weight:2,color:'#16262b'});mk[i].bringToFront();
+ const sub=Object.keys(D[0]).filter(c=>c!==meta.label&&c!==meta.lat&&c!==meta.lon&&!num.includes(c)).slice(0,2).map(c=>D[i][c]).join(' \u00b7 ');
+ glyph(cfg.axes.map(a=>({a,v:av(a,i),t:String(fmt(D[i][a.col]))})),String(D[i][meta.label]),sub);
+ $('#det').innerHTML='<table>'+cfg.axes.map(a=>'<tr><td>'+esc(a.label)+'</td><td>'+esc(fmt(D[i][a.col]))+'</td><td>'+Math.round(av(a,i)*100)+'</td></tr>').join('')+'</table><div>Last column is the percentile.</div>'}
+function showSel(){
+ if(!sel)return;const b=sel.b,p0=map.latLngToContainerPoint(b.getNorthWest()),p1=map.latLngToContainerPoint(b.getSouthEast());
+ const rb=$('#rb');rb.style.cssText='display:block;left:'+p0.x+'px;top:'+p0.y+'px;width:'+(p1.x-p0.x)+'px;height:'+(p1.y-p0.y)+'px';
+ const items=cfg.axes.map(a=>{const v=sel.idx.map(i=>av(a,i)).sort((x,y)=>x-y),k=q=>v[Math.floor((v.length-1)*q)],r=sel.idx.map(i=>D[i][a.col]).filter(x=>typeof x==='number').sort((x,y)=>x-y);return{a,v:k(.5),q:k(.75),t:String(fmt(r[Math.floor((r.length-1)/2)]))}});
+ glyph(items,sel.idx.length+' points','median of the brushed selection');
+ $('#det').innerHTML='<table>'+items.map(it=>'<tr><td>'+esc(it.a.label)+'</td><td>'+esc(it.t)+'</td><td>'+Math.round(it.v*100)+'</td></tr>').join('')+'</table><div>Median value, then median percentile. Light band: up to Q3. Dashed tick: all-points median.</div>'}
+function clear(){
+ if(hi>=0){mk[hi].setStyle({weight:.6,color:'#fff'});hi=-1}
+ if(cfg.mode==='brush'&&sel&&sel.idx.length)return showSel();
+ if(cfg.mode==='hover'&&D.length)return focus();
+ $('#gl').style.display='none';$('#tt').style.display='none';$('#rb').style.display='none';$('#det').textContent=cfg.mode==='hover'?'Hover a point to see its values.':'Drag on the map to brush a set of points.';paint()}
+let curItems=[];
+function focus(){if(!D.length||cfg.mode!=='hover')return;const c=map.getSize().divideBy(2);let b=-1,d=1e18;mk.forEach((m,i)=>{const p=map.latLngToContainerPoint(m.getLatLng()),e=(p.x-c.x)**2+(p.y-c.y)**2;if(e<d){d=e;b=i}});if(b>=0)hover(b)}
+function setMode(m){$('#xh').style.display=m==='hover'?'block':'none';
+ cfg.mode=m;sel=null;map.dragging[m==='brush'?'disable':'enable']();map.getContainer().style.cursor=m==='brush'?'crosshair':'';
+ $('#m-hover').classList.toggle('on',m==='hover');$('#m-brush').classList.toggle('on',m==='brush');
+ $('#hint').textContent=m==='hover'?'Move over a point to see its radial and values.':'Drag a rectangle to summarize the points inside it.';if(D.length)clear()}
+$('#m-hover').onclick=()=>setMode('hover');$('#m-brush').onclick=()=>setMode('brush');
+map.on('mousedown',e=>{if(cfg.mode!=='brush')return;st=e.containerPoint;sel=null;paint()});
+map.on('mousemove',e=>{if(!st)return;const p=e.containerPoint,r=$('#rb');r.style.cssText='display:block;left:'+Math.min(st.x,p.x)+'px;top:'+Math.min(st.y,p.y)+'px;width:'+Math.abs(p.x-st.x)+'px;height:'+Math.abs(p.y-st.y)+'px'});
+map.on('mouseup',e=>{if(!st)return;const p=e.containerPoint,s=st;st=null;
+ if(Math.abs(p.x-s.x)<5||Math.abs(p.y-s.y)<5)return clear();
+ const b=L.latLngBounds(map.containerPointToLatLng(s),map.containerPointToLatLng(p));
+ const idx=[];mk.forEach((m,i)=>b.contains(m.getLatLng())&&idx.push(i));
+ if(!idx.length)return clear();sel={b,idx};paint();showSel()});
+let rq=0;map.on('move',()=>{if(sel)showSel();else if(cfg.mode==='hover'&&!rq)rq=requestAnimationFrame(()=>{rq=0;focus()})});
+$('#axc').onclick=e=>{const k=e.target.closest('.chip');if(!k)return;const c=k.dataset.c,a=cfg.axes.find(x=>x.col===c);
+ if(a){if(cfg.axes.length>3)cfg.axes=cfg.axes.filter(x=>x!==a)}else cfg.axes.push({col:c,label:c,group:gname(c),invert:false});
+ if(!gcol[gname(c)])gcol[gname(c)]=PAL[Object.keys(gcol).length%PAL.length];ui();redraw()};
+$('#axc').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#axc').onclick(e)}};
+$('#ord').onchange=e=>{cfg.order=e.target.value;redraw()};
+$('#col').onchange=e=>{cfg.color=e.target.value;paint()};
+function redraw(){if(sel)showSel();else if(hi>=0)hover(hi);else clear()}
+$('#sg').onclick=()=>{if(!D.length)return;const c=num.filter(c=>new Set(D.map(r=>r[c])).size>10).slice(0,30);if(c.length<3)return $('#ai').textContent='Not enough numeric columns with spread to suggest bars.';
+ cfg.axes=c.map(x=>({col:x,label:x,group:gname(x),invert:false}));cfg.order='g';cfg.color=c[0];ui();redraw();
+ $('#ai').textContent='Used '+c.length+' numeric columns with enough spread, grouped by name prefix, colored by '+c[0]+'.'};
+$('#sv').onclick=()=>{if(!D.length)return;const o={lat:meta.lat,lon:meta.lon,label:meta.label,axes:cfg.axes,groups:Object.keys(gcol).map(n=>({name:n,color:gcol[n]})),color:cfg.color,order:cfg.order};
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:'application/json'}));a.download='radial-config.json';a.click()};
+function handle(files){[...files].forEach(f=>{
+ if(/\.csv$/i.test(f.name))Papa.parse(f,{header:true,skipEmptyLines:true,dynamicTyping:h=>!/(^id$|code|cod|ubigeo)/i.test(h),transformHeader:h=>h.replace(/^\uFEFF/,'').trim(),complete:r=>load(r.data)});
+ else f.text().then(t=>{try{const j=JSON.parse(t);
+  if(Array.isArray(j))load(j);else if(j.rows)load(j.rows);
+  else if(j.axes){pend=j;if(D.length)load(D);else msg('Config loaded. Now add the data file.')}
+  else msg('Unrecognized JSON. Use an array of rows or a config with axes.')}catch(e){msg('Could not read that JSON file.')}})})}
+$('#fi').onchange=e=>handle(e.target.files);
+['dragover','drop'].forEach(t=>document.addEventListener(t,e=>{e.preventDefault();$('#drop').classList.toggle('hot',t==='dragover');if(t==='drop')handle(e.dataTransfer.files)}));
+$('#demo').onclick=()=>{let s=3;const r=()=>(s=s*16807%2147483647)/2147483647;
+ load(Array.from({length:400},(_,i)=>{const la=-23+r()*8,lo=-48+r()*10,o={name:'Place '+(i+1),lat:la,lon:lo};
+ ['Econ_jobs','Econ_innovation','Econ_income','Social_education','Social_health','Social_safety','Env_water','Env_waste','Env_energy'].forEach((k,j)=>o[k]=Math.round(100*Math.max(0,Math.min(1,.5+.3*Math.sin(la*.9+j)+.25*Math.cos(lo*.8-j*.5)+(r()-.5)*.3))));
+ o.Region=la>-19?'North':'South';return o}))};
+function applyCfg(o){const ax=(o.axes||[]).filter(a=>P[a.col]).map(a=>({col:a.col,label:a.label||a.col,group:a.group||'Other',invert:!!a.invert}));if(ax.length<3)throw new Error('the model returned too few usable columns');
+ cfg.axes=ax;ax.forEach(a=>{if(!gcol[a.group])gcol[a.group]=PAL[Object.keys(gcol).length%PAL.length]});
+ if(o.color&&D[0][o.color]!==undefined)cfg.color=o.color;if(o.label&&D[0][o.label]!==undefined)meta.label=o.label;cfg.order=o.order==='v'?'v':'g';ui();redraw()}
+$('#sz').oninput=()=>redraw();
+let eng=null,engId='';
+$('#aiq').onclick=async()=>{if(!D.length)return;
+ if(!navigator.gpu){$('#sg').click();$('#ai').textContent='No WebGPU in this browser, so I used the rule-based setup. '+$('#ai').textContent;return}
+ const id=$('#mdl').value,pg=$('#pg'),ai=$('#ai');pg.style.display='block';$('#aiq').disabled=true;
+ try{
+  if(!eng||engId!==id){ai.textContent='Downloading the model (first time only)\u2026';const {CreateMLCEngine}=await import('https://esm.run/@mlc-ai/web-llm@0.2.85');eng=await CreateMLCEngine(id,{initProgressCallback:p=>{pg.value=p.progress||0;ai.textContent=String(p.text).slice(0,90)}});engId=id}
+  ai.textContent='Thinking\u2026';
+  const cols=Object.keys(D[0]).filter(c=>c!==meta.lat&&c!==meta.lon).slice(0,60).map(c=>c+(P[c]?' (number)':' (text)')).join(', ');
+  const pr='Group these dataset columns into 2 to 5 meaningful categories for a radial chart.\nColumns: '+cols+'\nGoal: '+($('#goal').value.trim()||'overview')+'\nReply with JSON only: {"axes":[{"col":"exact column name","label":"short name","group":"category","invert":false}],"color":"exact column name or empty"}\nUse only columns marked number, 6 to 18 of them. Set invert to true only when a high value is bad.';
+  const r=await eng.chat.completions.create({messages:[{role:'system',content:'You reply with JSON only.'},{role:'user',content:pr}],temperature:.2,max_tokens:700,response_format:{type:'json_object'}});
+  const t=r.choices[0].message.content;applyCfg(JSON.parse(t.slice(t.indexOf('{'),t.lastIndexOf('}')+1)));
+  ai.textContent='Applied '+cfg.axes.length+' bars in '+new Set(cfg.axes.map(a=>a.group)).size+' groups. Adjust them in the panel if needed.'}
+ catch(e){$('#sg').click();ai.textContent='The AI step failed ('+String(e.message||e).slice(0,70)+'), so I used the rule-based setup.'}
+ finally{pg.style.display='none';$('#aiq').disabled=false}};
+const gl=$('#gl'),kk=e=>e.target.dataset&&e.target.dataset.k;
+gl.addEventListener('mouseover',e=>{const k=kk(e);if(k==null)return;const it=curItems[k];paint(it.a.col);const a=$('#ax');a.innerHTML='<b>'+esc(it.a.label)+'</b> \u00b7 '+esc(it.a.group)+'<br>'+esc(it.t)+' \u00b7 bar at '+Math.round(it.v*100)+'%'+(it.q!=null?' (selection median)':'')+'<br>click to color the map by this';a.style.display='block'});
+gl.addEventListener('mouseout',()=>{$('#ax').style.display='none';paint()});
+gl.addEventListener('click',e=>{const k=kk(e);if(k==null)return;cfg.color=curItems[k].a.col;$('#col').value=cfg.color;paint()});
+async function preset(n){try{const[c,j]=await Promise.all([fetch('data/'+n+'.csv').then(r=>{if(!r.ok)throw 0;return r.text()}),fetch('data/'+n+'.json').then(r=>r.json())]);pend=j;
+ load(Papa.parse(c,{header:true,skipEmptyLines:true,dynamicTyping:h=>!/(^id$|code|cod|ubigeo)/i.test(h),transformHeader:h=>h.replace(/^\uFEFF/,'').trim()}).data)}
+ catch(e){msg('Could not read data/'+n+'.csv. Open the page from GitHub Pages, or run python3 -m http.server in this folder.')}}
+$('#pre').onclick=e=>{const k=e.target.closest('.chip');if(k)preset(k.dataset.p)};
+setMode('hover');
+</script>
+</body>
+</html>

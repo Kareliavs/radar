@@ -1,0 +1,201 @@
+{
+ "lat": "lat",
+ "lon": "lon",
+ "label": "nome",
+ "axes": [
+  {
+   "col": "dados_abertos",
+   "label": "Dados Abertos",
+   "group": "Capacidades Institucionais",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "estrategia",
+   "label": "Estratégia",
+   "group": "Capacidades Institucionais",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "infraestrutura_hw_sw",
+   "label": "Infraestrutura de TI (Hardware/Software)",
+   "group": "Capacidades Institucionais",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "monitoramento",
+   "label": "Monitoramento",
+   "group": "Capacidades Institucionais",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "servicos_aplicacoes",
+   "label": "Serviços e Aplicações",
+   "group": "Capacidades Institucionais",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "habitacao",
+   "label": "Habitação",
+   "group": "Econômica",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "infraestrutura_conectividade",
+   "label": "Infraestrutura de Conectividade",
+   "group": "Econômica",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "inovacao",
+   "label": "Inovação",
+   "group": "Econômica",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "servicos_online_prefeitura",
+   "label": "Serviços On-line da Prefeitura",
+   "group": "Econômica",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "sistemas_tecnologia_gestao_urbana",
+   "label": "Sistemas e Tecnologia para Gestão Urbana",
+   "group": "Econômica",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "transporte",
+   "label": "Transporte",
+   "group": "Econômica",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "urbanizacao_vias_publicas",
+   "label": "Urbanização das Vias Públicas",
+   "group": "Econômica",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "cultura",
+   "label": "Cultura",
+   "group": "Sociocultural",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "educacao",
+   "label": "Educação",
+   "group": "Sociocultural",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "gestao_desastres",
+   "label": "Gestão de Desastres",
+   "group": "Sociocultural",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "inclusao_digital",
+   "label": "Inclusão Digital",
+   "group": "Sociocultural",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "inclusao_social",
+   "label": "Inclusão Social",
+   "group": "Sociocultural",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "participacao_publica",
+   "label": "Participação Pública",
+   "group": "Sociocultural",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "saude",
+   "label": "Saúde",
+   "group": "Sociocultural",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "seguranca_publica",
+   "label": "Segurança Pública",
+   "group": "Sociocultural",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "agua_esgoto",
+   "label": "Água e Esgoto",
+   "group": "Meio Ambiente",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "areas_verdes",
+   "label": "Áreas Verdes",
+   "group": "Meio Ambiente",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "energia",
+   "label": "Energia",
+   "group": "Meio Ambiente",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "qualidade_ar",
+   "label": "Qualidade do Ar",
+   "group": "Meio Ambiente",
+   "min": 1,
+   "max": 7
+  },
+  {
+   "col": "residuos_solidos",
+   "label": "Resíduos Sólidos",
+   "group": "Meio Ambiente",
+   "min": 1,
+   "max": 7
+  }
+ ],
+ "groups": [
+  {
+   "name": "Capacidades Institucionais",
+   "color": "#7F77DD"
+  },
+  {
+   "name": "Econômica",
+   "color": "#EF9F27"
+  },
+  {
+   "name": "Sociocultural",
+   "color": "#378ADD"
+  },
+  {
+   "name": "Meio Ambiente",
+   "color": "#1D9E75"
+  }
+ ],
+ "color": "nivel_medio"
+}
